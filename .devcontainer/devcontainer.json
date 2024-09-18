@@ -45,7 +45,8 @@
 				"esbenp.prettier-vscode",
 				"eamodio.gitlens",
 				"ms-vscode.vscode-typescript-next",
-				"humao.rest-client"
+				"humao.rest-client",
+				"orta.vscode-jest"
 			]
 		}
 	}
