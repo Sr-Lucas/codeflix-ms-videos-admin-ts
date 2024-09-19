@@ -1,5 +1,7 @@
+import { UUID } from "../shared/value-objects/uuid.vo";
+
 export type CategoryProps = {
-  categoryId?: string;
+  categoryId?: UUID;
   name: string;
   description?: string | null;
   isActive?: boolean;
@@ -13,7 +15,7 @@ export type CategoryCreateCommand = {
 };
 
 export class Category {
-  categoryId: string;
+  categoryId: UUID;
   name: string;
   description: string | null;
   isActive: boolean;
@@ -21,7 +23,7 @@ export class Category {
 
   // Constructor in a need of rehydration after getting a category from database
   constructor(props: CategoryProps) {
-    this.categoryId = props.categoryId ?? "generated";
+    this.categoryId = props.categoryId ?? new UUID();
     this.name = props.name;
     this.description = props.description ?? null;
     this.isActive = props.isActive ?? true;
@@ -54,5 +56,15 @@ export class Category {
 
   public deactivate(): void {
     this.isActive = false;
+  }
+
+  toJSON() {
+    return {
+      categoryId: this.categoryId.id,
+      name: this.name,
+      description: this.description,
+      isActive: this.isActive,
+      createdAt: this.createdAt,
+    };
   }
 }

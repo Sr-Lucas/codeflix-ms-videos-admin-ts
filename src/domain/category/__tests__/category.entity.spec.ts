@@ -1,3 +1,4 @@
+import { UUID } from "../../shared/value-objects/uuid.vo";
 import { Category } from "../category.entity";
 
 describe("Category Unit Tests", () => {
@@ -9,7 +10,7 @@ describe("Category Unit Tests", () => {
       });
 
       // Assert
-      expect(category.categoryId).toBe("generated");
+      expect(category.categoryId).toBeInstanceOf(UUID);
       expect(category.name).toBe("Movie");
       expect(category.description).toBeNull();
       expect(category.isActive).toBeTruthy();
@@ -21,11 +22,16 @@ describe("Category Unit Tests", () => {
         name: "Movie",
         description: "Testing",
         isActive: false,
-        categoryId: "Category ID",
+        categoryId: new UUID("f2761a08-89ac-4d5f-bfd7-f8a20b3f2633"),
         createdAt: new Date(),
       });
 
-      expect(category.categoryId).toBe("Category ID");
+      expect(category.categoryId).toBeInstanceOf(UUID);
+      expect(
+        category.categoryId.equals(
+          new UUID("f2761a08-89ac-4d5f-bfd7-f8a20b3f2633")
+        )
+      ).toBe(true);
       expect(category.name).toBe("Movie");
       expect(category.description).toBe("Testing");
       expect(category.isActive).toBeFalsy();
@@ -39,7 +45,7 @@ describe("Category Unit Tests", () => {
         name: "Movie",
       });
 
-      expect(category.categoryId).toBe("generated");
+      expect(category.categoryId).toBeInstanceOf(UUID);
       expect(category.name).toBe("Movie");
       expect(category.description).toBeNull();
       expect(category.isActive).toBeTruthy();
