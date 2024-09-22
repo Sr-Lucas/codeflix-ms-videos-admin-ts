@@ -1,4 +1,6 @@
+import ValidatorRules from "../shared/validators/validator-rules";
 import { UUID } from "../shared/value-objects/uuid.vo";
+import { CategoryValidatorFactory } from "./category.validator";
 
 export type CategoryProps = {
   categoryId?: UUID;
@@ -32,7 +34,9 @@ export class Category {
 
   // Create factory method is resposible to create a new Category to be inserted in database
   static create(props: CategoryCreateCommand): Category {
-    return new Category(props);
+    const category = new Category(props);
+    Category.validate(category);
+    return category;
   }
 
   /**
@@ -44,10 +48,12 @@ export class Category {
    */
   public changeName(name: string): void {
     this.name = name;
+    Category.validate(this);
   }
 
   public changeDescription(description: string): void {
     this.description = description;
+    Category.validate(this);
   }
 
   public activate(): void {
@@ -56,6 +62,11 @@ export class Category {
 
   public deactivate(): void {
     this.isActive = false;
+  }
+
+  static validate(entity: Category) {
+    const validator = CategoryValidatorFactory.create();
+    validator.validate(entity);
   }
 
   toJSON() {

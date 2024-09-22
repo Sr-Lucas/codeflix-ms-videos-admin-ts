@@ -53,6 +53,25 @@ describe("Category Unit Tests", () => {
     });
   });
 
+  describe("categoryId field", () => {
+    const arrange = [
+      { categoryId: null },
+      { categoryId: undefined },
+      { categoryId: new UUID() },
+    ];
+
+    test.each(arrange)("id = %j", ({ categoryId }) => {
+      const category = new Category({
+        name: "Movie",
+        categoryId: categoryId as any,
+      });
+      expect(category.categoryId).toBeInstanceOf(UUID);
+      if (categoryId instanceof UUID) {
+        expect(category.categoryId).toBe(categoryId);
+      }
+    });
+  });
+
   describe("Activate/Deactivate method", () => {
     test("should activate a category", () => {
       const category = Category.create({
