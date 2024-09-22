@@ -2,6 +2,12 @@ import { UUID } from "../../shared/value-objects/uuid.vo";
 import { Category } from "../category.entity";
 
 describe("Category Unit Tests", () => {
+  let validateSpy: any;
+
+  beforeEach(() => {
+    validateSpy = jest.spyOn(Category, "validate");
+  });
+
   describe("Constructor method", () => {
     test("should be able to instantiate a category providing only the required param 'name'", () => {
       // Arrange and Act
@@ -50,6 +56,7 @@ describe("Category Unit Tests", () => {
       expect(category.description).toBeNull();
       expect(category.isActive).toBeTruthy();
       expect(category.createdAt).toBeInstanceOf(Date);
+      expect(validateSpy).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -98,5 +105,24 @@ describe("Category Unit Tests", () => {
 
       expect(category.isActive).toBe(false);
     });
+  });
+
+  test("Should change name", () => {
+    const category = new Category({
+      name: "Movies",
+    });
+    category.changeName("Other name");
+    expect(category.name).toBe("Other name");
+    expect(validateSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test("Should change description", () => {
+    const category = new Category({
+      name: "Movies",
+      description: "Description Movies",
+    });
+    category.changeDescription("Other description");
+    expect(category.description).toBe("Other description");
+    expect(validateSpy).toHaveBeenCalledTimes(1);
   });
 });
