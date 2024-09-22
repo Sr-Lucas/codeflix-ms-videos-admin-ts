@@ -126,3 +126,28 @@ describe("Category Unit Tests", () => {
     expect(validateSpy).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("Category validator", () => {
+  describe("Create command", () => {
+    test("should throw an error if category was created with invalid name", () => {
+      expect(() =>
+        Category.create({
+          name: "",
+        })
+      ).containsErrorMessages({
+        name: ["name should not be empty"],
+      });
+    });
+
+    test("should throw an error if category was created with invalid description", () => {
+      expect(() =>
+        Category.create({
+          name: "Teste",
+          desciption: "",
+        })
+      ).containsErrorMessages({
+        name: ["desciption should not be empty"],
+      });
+    });
+  });
+});

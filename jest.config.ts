@@ -16,6 +16,7 @@ const config: Config = {
   transform: {
     "^.+\\.(t|j)s$": "@swc/jest",
   },
+  setupFilesAfterEnv: ["./infra/shared/testing/expect-helpers.ts"],
 };
 
 export default config;

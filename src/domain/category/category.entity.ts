@@ -1,4 +1,7 @@
+import { Entity } from "../shared/entity";
+import { EntityValidationError } from "../shared/validators/validation.error";
 import ValidatorRules from "../shared/validators/validator-rules";
+import { ValueObject } from "../shared/value-object";
 import { UUID } from "../shared/value-objects/uuid.vo";
 import { CategoryValidatorFactory } from "./category.validator";
 
@@ -16,7 +19,7 @@ export type CategoryCreateCommand = {
   isActive?: boolean;
 };
 
-export class Category {
+export class Category extends Entity {
   categoryId: UUID;
   name: string;
   description: string | null;
@@ -25,6 +28,7 @@ export class Category {
 
   // Constructor in a need of rehydration after getting a category from database
   constructor(props: CategoryProps) {
+    super();
     this.categoryId = props.categoryId ?? new UUID();
     this.name = props.name;
     this.description = props.description ?? null;
@@ -37,6 +41,10 @@ export class Category {
     const category = new Category(props);
     Category.validate(category);
     return category;
+  }
+
+  get entityId(): ValueObject {
+    return this.categoryId;
   }
 
   /**
@@ -66,7 +74,10 @@ export class Category {
 
   static validate(entity: Category) {
     const validator = CategoryValidatorFactory.create();
-    validator.validate(entity);
+    const isValid = validator.validate(entity);
+    if (!isValid) {
+      throw new EntityValidationError(validator.errors!);
+    }
   }
 
   toJSON() {
