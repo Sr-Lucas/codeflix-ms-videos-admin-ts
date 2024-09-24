@@ -1,7 +1,7 @@
-import { Entity } from "../entity";
-import { NotFoundError } from "../errors/not-found.error";
-import { ValueObject } from "../value-object";
-import { IRepository } from "../repository/repository";
+import { Entity } from "../../../domain/shared/entity";
+import { NotFoundError } from "../../../domain/shared/errors/not-found.error";
+import { ValueObject } from "../../../domain/shared/value-object";
+import { IRepository } from "../../../domain/shared/repository/repository";
 
 export abstract class InMemoryRepository<
   E extends Entity,
