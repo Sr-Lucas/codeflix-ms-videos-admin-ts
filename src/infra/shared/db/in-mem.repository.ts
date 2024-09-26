@@ -1,7 +1,15 @@
 import { Entity } from "../../../domain/shared/entity";
 import { NotFoundError } from "../../../domain/shared/errors/not-found.error";
 import { ValueObject } from "../../../domain/shared/value-object";
-import { IRepository } from "../../../domain/shared/repository/repository";
+import {
+  IRepository,
+  ISearchableRepository,
+} from "../../../domain/shared/repository/repository-interface";
+import { SearchResult } from "../../../domain/shared/repository/search-result";
+import {
+  SearchParams,
+  SortDirection,
+} from "../../../domain/shared/repository/search-params";
 
 export abstract class InMemoryRepository<
   E extends Entity,
@@ -53,4 +61,85 @@ export abstract class InMemoryRepository<
     const item = this.items.findIndex((v) => v.entityId === entityId);
     return item;
   }
+}
+
+export abstract class InMemorySearchableRepository<
+  E extends Entity,
+  EntityId extends ValueObject,
+  Filter = string
+> implements ISearchableRepository<E, EntityId, Filter>
+{
+  items: E[] = [];
+  sortableFields: string[] = ["name"];
+
+  async search(props: SearchParams<Filter>): Promise<SearchResult<Entity>> {
+    const filteredItems = await this.applyFilter(this.items, props.filter);
+    const sortedItems = await this.applySort(
+      filteredItems,
+      props.sort,
+      props.sortDir
+    );
+    const paginatedItems = this.applyPagination(
+      sortedItems,
+      props.page,
+      props.perPage
+    );
+    return new SearchResult({
+      items: paginatedItems,
+      total: filteredItems.length,
+      currentPage: props.page,
+      perPage: props.perPage,
+    });
+  }
+
+  protected abstract applyFilter(
+    items: E[],
+    filter: Filter | null
+  ): Promise<E[]>;
+
+  protected async applySort(
+    items: E[],
+    sort: string | null,
+    sortDir: SortDirection | null,
+    customGetter?: (sort: string, item: E) => any
+  ): Promise<E[]> {
+    if (!sort || !this.sortableFields.includes(sort)) {
+      return items;
+    }
+
+    return [...items].sort((a, b) => {
+      //@ts-ignore
+      const aValue = customGetter ? customGetter(sort, a) : a[sort];
+      //@ts-ignore
+      const bValue = customGetter ? customGetter(sort, b) : b[sort];
+
+      if (aValue < bValue) {
+        return sortDir === "asc" ? -1 : 1;
+      }
+
+      if (aValue > bValue) {
+        return sortDir === "asc" ? 1 : -1;
+      }
+
+      return 1;
+    });
+  }
+
+  protected applyPagination(
+    items: E[],
+    page: SearchParams["page"],
+    perPage: SearchParams["perPage"]
+  ) {
+    const start = (page - 1) * perPage;
+    const limit = start + perPage;
+    return items.slice(start, limit);
+  }
+
+  abstract insert(entity: E): Promise<void>;
+  abstract bulkInsert(entities: E[]): Promise<void>;
+  abstract update(entity: E): Promise<void>;
+  abstract delete(entityId: EntityId): Promise<void>;
+  abstract findById(entityId: EntityId): Promise<E | null>;
+  abstract findAll(): Promise<E[]>;
+  abstract getEntity(): new (...args: any[]) => E;
 }
