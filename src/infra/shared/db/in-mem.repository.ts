@@ -64,13 +64,14 @@ export abstract class InMemoryRepository<
 }
 
 export abstract class InMemorySearchableRepository<
-  E extends Entity,
-  EntityId extends ValueObject,
-  Filter = string
-> implements ISearchableRepository<E, EntityId, Filter>
+    E extends Entity,
+    EntityId extends ValueObject,
+    Filter = string
+  >
+  extends InMemoryRepository<E, EntityId>
+  implements ISearchableRepository<E, EntityId, Filter>
 {
-  items: E[] = [];
-  sortableFields: string[] = ["name"];
+  sortableFields: string[] = [];
 
   async search(props: SearchParams<Filter>): Promise<SearchResult<Entity>> {
     const filteredItems = await this.applyFilter(this.items, props.filter);
@@ -103,22 +104,29 @@ export abstract class InMemorySearchableRepository<
     sortDir: SortDirection | null,
     customGetter?: (sort: string, item: E) => any
   ): Promise<E[]> {
+    let sortValue = sort;
+    let sortDirValue = sortDir;
+
     if (!sort || !this.sortableFields.includes(sort)) {
-      return items;
+      sortValue = "createdAt";
+    }
+
+    if (!sortDir) {
+      sortDirValue = "desc";
     }
 
     return [...items].sort((a, b) => {
       //@ts-ignore
-      const aValue = customGetter ? customGetter(sort, a) : a[sort];
+      const aValue = customGetter ? customGetter(sortValue, a) : a[sortValue];
       //@ts-ignore
-      const bValue = customGetter ? customGetter(sort, b) : b[sort];
+      const bValue = customGetter ? customGetter(sortValue, b) : b[sortValue];
 
       if (aValue < bValue) {
-        return sortDir === "asc" ? -1 : 1;
+        return sortDirValue === "asc" ? -1 : 1;
       }
 
       if (aValue > bValue) {
-        return sortDir === "asc" ? 1 : -1;
+        return sortDirValue === "asc" ? 1 : -1;
       }
 
       return 1;
@@ -134,12 +142,4 @@ export abstract class InMemorySearchableRepository<
     const limit = start + perPage;
     return items.slice(start, limit);
   }
-
-  abstract insert(entity: E): Promise<void>;
-  abstract bulkInsert(entities: E[]): Promise<void>;
-  abstract update(entity: E): Promise<void>;
-  abstract delete(entityId: EntityId): Promise<void>;
-  abstract findById(entityId: EntityId): Promise<E | null>;
-  abstract findAll(): Promise<E[]>;
-  abstract getEntity(): new (...args: any[]) => E;
 }
