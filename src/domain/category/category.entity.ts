@@ -3,6 +3,7 @@ import { EntityValidationError } from "../shared/validators/validation.error";
 import ValidatorRules from "../shared/validators/validator-rules";
 import { ValueObject } from "../shared/value-object";
 import { UUID } from "../shared/value-objects/uuid.vo";
+import { CategoryFakeBuilder } from "./category-fake.builder";
 import { CategoryValidatorFactory } from "./category.validator";
 
 export type CategoryProps = {
@@ -70,6 +71,10 @@ export class Category extends Entity {
 
   public deactivate(): void {
     this.isActive = false;
+  }
+
+  static fake() {
+    return CategoryFakeBuilder;
   }
 
   static validate(entity: Category) {
